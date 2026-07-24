@@ -36,6 +36,7 @@ interface InfiniteCanvasProps {
   onAddElement: (element: CanvasElement) => void;
   onAddConnection: (connection: CanvasConnection) => void;
   onDeleteSelected: () => void;
+  onDuplicateSelected?: () => void;
   onOpenDetails: (tab?: 'overview' | 'properties' | 'notes' | 'comments' | 'attachments') => void;
   onOpenStylePicker: () => void;
   onAddChildNode: (parentId: string, direction?: string) => void;
@@ -63,6 +64,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({
   onAddElement,
   onAddConnection,
   onDeleteSelected,
+  onDuplicateSelected,
   onOpenDetails,
   onOpenStylePicker,
   onAddChildNode,
@@ -654,7 +656,9 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({
         onSendBackward={onSendBackward}
         onSendToBack={onSendToBack}
         onDuplicate={() => {
-          if (selectedElem) {
+          if (onDuplicateSelected) {
+            onDuplicateSelected();
+          } else if (selectedElem) {
             const dup: CanvasElement = {
               ...selectedElem,
               id: `elem-${Date.now()}`,

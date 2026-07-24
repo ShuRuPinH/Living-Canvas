@@ -13,6 +13,7 @@ import {
   importBoardFromJSON,
   resetBoardToDemo,
 } from './utils/storage';
+import { isElementContainedInFrame } from './utils/canvas';
 import { useCanvasHistory } from './hooks/useCanvasHistory';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
@@ -158,28 +159,101 @@ export default function App() {
   const handleDuplicateSelected = useCallback(() => {
     if (selectedElementIds.length === 0) return;
 
+    const newSelectedIds: string[] = [];
+
     setBoardState((prev) => {
       const nextElements = { ...prev.elements };
-      const newSelectedIds: string[] = [];
+      const nextConnections = { ...prev.connections };
+
+      // Map old element ID -> new duplicated element ID
+      const idMap: Record<string, string> = {};
 
       selectedElementIds.forEach((id) => {
         const target = prev.elements[id];
-        if (target) {
-          const newId = `elem-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
-          const dup: CanvasElement = {
+        if (!target) return;
+
+        if (target.type === 'frame') {
+          // Offsets for frame: place it to the right with 40px margin to avoid overlap/sticking
+          const offsetX = target.width + 40;
+          const offsetY = 0;
+
+          const newFrameId = `elem-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+          idMap[target.id] = newFrameId;
+
+          const dupFrame: CanvasElement = {
             ...target,
-            id: newId,
-            x: target.x + 30,
-            y: target.y + 30,
-            title: `${target.title} (Copy)`,
+            id: newFrameId,
+            x: target.x + offsetX,
+            y: target.y + offsetY,
+            title: target.title ? `${target.title} (Copy)` : 'FRAME (Copy)',
           };
-          nextElements[newId] = dup;
-          newSelectedIds.push(newId);
+          nextElements[newFrameId] = dupFrame;
+          newSelectedIds.push(newFrameId);
+
+          // Find contained elements inside this frame
+          (Object.values(prev.elements) as CanvasElement[]).forEach((child) => {
+            if (
+              child.id !== target.id &&
+              (child.frameId === target.id || isElementContainedInFrame(child, target))
+            ) {
+              const newChildId = `elem-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+              idMap[child.id] = newChildId;
+
+              const dupChild: CanvasElement = {
+                ...child,
+                id: newChildId,
+                frameId: newFrameId,
+                x: child.x + offsetX,
+                y: child.y + offsetY,
+              };
+              nextElements[newChildId] = dupChild;
+            }
+          });
+        } else {
+          // Standard element offset
+          if (!idMap[target.id]) {
+            const offsetX = 40;
+            const offsetY = 40;
+
+            const newId = `elem-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            idMap[target.id] = newId;
+
+            const dup: CanvasElement = {
+              ...target,
+              id: newId,
+              x: target.x + offsetX,
+              y: target.y + offsetY,
+              title: target.title ? `${target.title} (Copy)` : target.title,
+            };
+            nextElements[newId] = dup;
+            newSelectedIds.push(newId);
+          }
         }
       });
 
-      return { ...prev, elements: nextElements };
+      // Duplicate connections between duplicated elements
+      (Object.values(prev.connections) as CanvasConnection[]).forEach((conn) => {
+        if (idMap[conn.sourceId] && idMap[conn.targetId]) {
+          const newConnId = `conn-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+          nextConnections[newConnId] = {
+            ...conn,
+            id: newConnId,
+            sourceId: idMap[conn.sourceId],
+            targetId: idMap[conn.targetId],
+          };
+        }
+      });
+
+      return {
+        ...prev,
+        elements: nextElements,
+        connections: nextConnections,
+      };
     });
+
+    if (newSelectedIds.length > 0) {
+      setSelectedElementIds(newSelectedIds);
+    }
   }, [selectedElementIds, setBoardState]);
 
   // Layer Ordering Handlers (Z-Index)
@@ -503,6 +577,7 @@ export default function App() {
               onAddElement={handleAddElement}
               onAddConnection={handleAddConnection}
               onDeleteSelected={handleDeleteSelected}
+              onDuplicateSelected={handleDuplicateSelected}
               onOpenDetails={handleOpenDetails}
               onOpenStylePicker={() => setShowStylePicker((prev) => !prev)}
               onAddChildNode={handleAddChildNode}

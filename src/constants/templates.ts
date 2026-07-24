@@ -22,6 +22,12 @@ export const OBJECT_TYPE_SUGGESTIONS: Record<string, { label: string; key: strin
     { label: 'Replication', key: 'Replication', defaultValue: 'Multi-AZ Sync' },
     { label: 'Port', key: 'Port', defaultValue: '5432' },
   ],
+  Function: [
+    { label: 'Runtime', key: 'Runtime', defaultValue: 'Node.js 20 / Python 3.11' },
+    { label: 'Trigger', key: 'Trigger', defaultValue: 'HTTP / EventBridge' },
+    { label: 'Timeout', key: 'Timeout', defaultValue: '30s' },
+    { label: 'Memory', key: 'Memory', defaultValue: '512 MB' },
+  ],
   Person: [
     { label: 'Role', key: 'Role', defaultValue: 'Staff Architect' },
     { label: 'Team', key: 'Team', defaultValue: 'Infrastructure' },

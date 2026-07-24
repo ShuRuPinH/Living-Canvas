@@ -460,6 +460,7 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
                   'Generic',
                   'Microservice',
                   'Database',
+                  'Function',
                   'Person',
                   'Project',
                   'Task',

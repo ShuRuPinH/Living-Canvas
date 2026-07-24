@@ -18,6 +18,7 @@ export type KnowledgeObjectType =
   | 'Generic'
   | 'Microservice'
   | 'Database'
+  | 'Function'
   | 'Person'
   | 'Project'
   | 'Task'

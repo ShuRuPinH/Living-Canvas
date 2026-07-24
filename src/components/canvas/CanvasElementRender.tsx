@@ -224,19 +224,25 @@ export const CanvasElementRender: React.FC<CanvasElementRenderProps> = ({
         {/* Content Container inside Shape */}
         <div className="absolute inset-0 px-4 pt-3 pb-3 flex flex-col justify-between pointer-events-none z-10 overflow-hidden">
           {/* Top category badge or icon */}
-          <div className="flex justify-between items-center w-full shrink-0 gap-1.5">
-            <span className="text-[10px] font-bold text-indigo-700 uppercase bg-indigo-50/90 px-2 py-0.5 rounded-md border border-indigo-200/80 shadow-2xs tracking-wide truncate max-w-[80%]">
-              {element.objectType ? element.objectType : element.type}
-            </span>
-            {element.icon && (
-              <div
-                className="p-1 rounded-md bg-indigo-100/90 text-indigo-700 border border-indigo-200/90 shadow-2xs flex items-center justify-center shrink-0"
-                title={`Icon: ${element.icon}`}
-              >
-                {renderIcon(element.icon, 15)}
-              </div>
-            )}
-          </div>
+          {(element.objectType || element.icon) && (
+            <div className="flex justify-between items-center w-full shrink-0 gap-1.5">
+              {element.objectType ? (
+                <span className="text-[10px] font-bold text-indigo-700 uppercase bg-indigo-50/90 px-2 py-0.5 rounded-md border border-indigo-200/80 shadow-2xs tracking-wide truncate max-w-[80%]">
+                  {element.objectType}
+                </span>
+              ) : (
+                <div />
+              )}
+              {element.icon && (
+                <div
+                  className="p-1 rounded-md bg-indigo-100/90 text-indigo-700 border border-indigo-200/90 shadow-2xs flex items-center justify-center shrink-0"
+                  title={`Icon: ${element.icon}`}
+                >
+                  {renderIcon(element.icon, 15)}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Title & Description */}
           <div className="flex flex-col my-auto text-left w-full min-h-0 py-1">
