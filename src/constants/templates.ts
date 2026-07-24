@@ -1,6 +1,10 @@
 import { CanvasBoardState, KnowledgeObjectType } from '../types/canvas';
 
-export const OBJECT_TYPE_SUGGESTIONS: Record<KnowledgeObjectType, { label: string; key: string; defaultValue: string }[]> = {
+export const OBJECT_TYPE_SUGGESTIONS: Record<string, { label: string; key: string; defaultValue: string }[]> = {
+  '': [
+    { label: 'Status', key: 'Status', defaultValue: 'Active' },
+    { label: 'Owner', key: 'Owner', defaultValue: 'Team' },
+  ],
   Generic: [
     { label: 'Status', key: 'Status', defaultValue: 'Active' },
     { label: 'Owner', key: 'Owner', defaultValue: 'Team' },

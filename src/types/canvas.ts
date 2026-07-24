@@ -14,6 +14,7 @@ export type ElementType =
   | 'freehand';
 
 export type KnowledgeObjectType =
+  | ''
   | 'Generic'
   | 'Microservice'
   | 'Database'

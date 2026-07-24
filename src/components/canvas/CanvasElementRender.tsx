@@ -226,7 +226,7 @@ export const CanvasElementRender: React.FC<CanvasElementRenderProps> = ({
           {/* Top category badge or icon */}
           <div className="flex justify-between items-center w-full shrink-0 gap-1.5">
             <span className="text-[10px] font-bold text-indigo-700 uppercase bg-indigo-50/90 px-2 py-0.5 rounded-md border border-indigo-200/80 shadow-2xs tracking-wide truncate max-w-[80%]">
-              {element.objectType || (element.type === 'rounded-rectangle' ? 'Microservice' : element.type)}
+              {element.objectType ? element.objectType : element.type}
             </span>
             {element.icon && (
               <div

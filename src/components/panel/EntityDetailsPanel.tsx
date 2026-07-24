@@ -101,6 +101,7 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
   const [newAttachName, setNewAttachName] = useState('');
   const [newAttachUrl, setNewAttachUrl] = useState('');
   const [newAttachType, setNewAttachType] = useState<'url' | 'image' | 'file'>('url');
+  const [schemaToast, setSchemaToast] = useState<string | null>(null);
 
   if (!element && !connection) return null;
 
@@ -133,16 +134,23 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
   const handleTypeChange = (type: KnowledgeObjectType) => {
     if (!element) return;
     let updated = { ...element, objectType: type };
-    updated = addHistoryLog(updated, 'Type Changed', `Changed object type to ${type}`);
+    updated = addHistoryLog(
+      updated,
+      'Type Changed',
+      type ? `Changed object type to ${type}` : 'Cleared object type'
+    );
     onUpdateElement(updated);
   };
 
   const handleApplySuggestedProperties = () => {
-    if (!element || !element.objectType) return;
-    const suggestions = OBJECT_TYPE_SUGGESTIONS[element.objectType] || [];
-    const existingKeys = new Set(element.properties.map((p) => p.key));
+    if (!element) return;
+    const objectTypeKey = element.objectType || 'Generic';
+    const suggestions =
+      OBJECT_TYPE_SUGGESTIONS[objectTypeKey] || OBJECT_TYPE_SUGGESTIONS['Generic'] || [];
+    const existingKeys = new Set((element.properties || []).map((p) => p.key));
 
-    const newProps: PropertyItem[] = [...element.properties];
+    const newProps: PropertyItem[] = [...(element.properties || [])];
+    let addedCount = 0;
     suggestions.forEach((s) => {
       if (!existingKeys.has(s.key)) {
         newProps.push({
@@ -150,12 +158,24 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
           key: s.key,
           value: s.defaultValue,
         });
+        addedCount++;
       }
     });
 
     let updated = { ...element, properties: newProps };
-    updated = addHistoryLog(updated, 'Properties Added', `Applied schema suggestions for ${element.objectType}`);
+    updated = addHistoryLog(
+      updated,
+      'Properties Added',
+      `Applied schema suggestions for ${objectTypeKey || 'Generic'}`
+    );
     onUpdateElement(updated);
+    setActiveTab('properties');
+    setSchemaToast(
+      addedCount > 0
+        ? `Added ${addedCount} schema property suggestions!`
+        : 'All suggested schema properties are already present!'
+    );
+    setTimeout(() => setSchemaToast(null), 3500);
   };
 
   const handleAddTag = () => {
@@ -421,21 +441,21 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
                 <label className="font-semibold text-slate-500 dark:text-slate-400">
                   Knowledge Object Type
                 </label>
-                {element.objectType && element.objectType !== 'Generic' && (
-                  <button
-                    onClick={handleApplySuggestedProperties}
-                    className="text-indigo-600 dark:text-indigo-400 hover:underline text-[11px] font-semibold flex items-center gap-1"
-                  >
-                    <LucideIcons.Sparkles size={12} />
-                    <span>Suggest Schema Props</span>
-                  </button>
-                )}
+                <button
+                  onClick={handleApplySuggestedProperties}
+                  className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                  title="Auto-add suggested properties schema for this object type"
+                >
+                  <LucideIcons.Sparkles size={12} className="text-amber-500" />
+                  <span>Suggest Schema Props</span>
+                </button>
               </div>
               <select
-                value={element.objectType || 'Generic'}
+                value={element.objectType || ''}
                 onChange={(e) => handleTypeChange(e.target.value as KnowledgeObjectType)}
-                className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium outline-none text-slate-800 dark:text-slate-100"
+                className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium outline-none text-slate-800 dark:text-slate-100 cursor-pointer"
               >
+                <option value="">— Not Specified (Empty) —</option>
                 {[
                   'Generic',
                   'Microservice',
@@ -560,6 +580,27 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
         {/* CUSTOM PROPERTIES TAB */}
         {activeTab === 'properties' && element && (
           <div className="space-y-4">
+            {schemaToast && (
+              <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800 rounded-xl font-medium text-xs flex items-center gap-2 animate-in fade-in duration-200">
+                <LucideIcons.CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>{schemaToast}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                Properties ({element.properties.length})
+              </span>
+              <button
+                onClick={handleApplySuggestedProperties}
+                className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900 border border-indigo-200 dark:border-indigo-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Auto-populate recommended properties schema"
+              >
+                <LucideIcons.Sparkles size={13} className="text-amber-500" />
+                <span>Suggest Schema Props</span>
+              </button>
+            </div>
+
             <div className="space-y-2">
               {element.properties.length === 0 ? (
                 <div className="p-4 text-center text-slate-400 border border-dashed rounded-xl">
