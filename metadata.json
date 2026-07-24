@@ -1,0 +1,6 @@
+{
+  "name": "Living Canvas",
+  "description": "Infinite canvas knowledge board where visual shapes evolve into detailed knowledge entities with properties, notes, comments, connections, and multiple views.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
