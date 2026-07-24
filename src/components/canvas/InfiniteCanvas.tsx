@@ -542,7 +542,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({
         }}
       >
         {/* Render Connections SVG Layer */}
-        <svg className="w-full h-full overflow-visible absolute inset-0 pointer-events-none">
+        <svg className="w-full h-full overflow-visible absolute inset-0 pointer-events-none" style={{ zIndex: 1000 }}>
           {(Object.values(connections) as CanvasConnection[]).map((conn) => (
             <CanvasConnectionRender
               key={conn.id}
