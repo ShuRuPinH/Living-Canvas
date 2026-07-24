@@ -3,6 +3,7 @@ import * as LucideIcons from 'lucide-react';
 import {
   CanvasElement,
   CanvasConnection,
+  ConnectionType,
   KnowledgeObjectType,
   PropertyItem,
   NoteItem,

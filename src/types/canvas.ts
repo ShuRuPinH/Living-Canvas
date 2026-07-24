@@ -139,13 +139,18 @@ export interface CanvasElement {
 }
 
 export type ConnectionType =
+  | ''
   | 'default'
   | 'HTTP'
+  | 'REST API'
+  | 'GraphQL'
+  | 'gRPC'
+  | 'WebSocket'
   | 'Data Flow'
+  | 'Database Link'
   | 'Dependency'
   | 'Parent-Child'
   | 'Event'
-  | 'gRPC'
   | 'Custom';
 
 export type LineStyle = 'straight' | 'curved' | 'orthogonal';

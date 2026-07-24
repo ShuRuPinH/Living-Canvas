@@ -98,7 +98,10 @@ export const CanvasConnectionRender: React.FC<CanvasConnectionRenderProps> = ({
       />
 
       {/* Connection Label & Type Pill */}
-      {(connection.label || connection.connectionType) && (
+      {Boolean(
+        (connection.label && connection.label.trim() !== '') ||
+        (connection.connectionType && connection.connectionType.trim() !== '')
+      ) && (
         <foreignObject
           x={midX - 90}
           y={midY - 16}
@@ -114,12 +117,14 @@ export const CanvasConnectionRender: React.FC<CanvasConnectionRenderProps> = ({
                   : 'bg-white/95 dark:bg-slate-800/95 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-600'
               }`}
             >
-              {connection.connectionType && (
+              {connection.connectionType && connection.connectionType.trim() !== '' && (
                 <span className="opacity-75 font-mono text-[10px] uppercase tracking-wide">
                   [{connection.connectionType}]
                 </span>
               )}
-              {connection.label && <span className="truncate max-w-[100px]">{connection.label}</span>}
+              {connection.label && connection.label.trim() !== '' && (
+                <span className="truncate max-w-[100px]">{connection.label}</span>
+              )}
             </div>
           </div>
         </foreignObject>
