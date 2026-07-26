@@ -1,0 +1,26 @@
+---
+description: Living Canvas MCP — architecture boards from requirements, then repo structure
+alwaysApply: true
+---
+
+# Living Canvas MCP
+
+When the user asks to design architecture, update a knowledge board from ТЗ/requirements, or propose a repo layout from a board:
+
+1. Prefer **living-canvas** MCP tools (not inventing structure only in chat).
+2. Typical flow:
+   - `list_boards` → pick board (or `create_board`)
+   - `export_architecture` to see current graph
+   - `upsert_entity` / `upsert_connection` to apply the ТЗ
+   - `export_architecture` again
+   - Propose repository structure from nodes/edges
+3. Use the MCP prompt `update_board_from_requirements` when available.
+4. Do not invent services that are not implied by the requirements.
+5. Entity `objectType` values: Microservice, Database, Function, Person, Project, Task, Event, Document, Idea, Device, Generic, Custom.
+6. Connection `connectionType` values: HTTP, REST API, GraphQL, gRPC, WebSocket, Data Flow, Database Link, Dependency, Parent-Child, Event, Custom.
+
+Example user ask:
+
+> По ТЗ обнови board `<id>`, потом предложи структуру репо
+
+API must be running (`docker compose up` or `npm run server`) for MCP tools to work.

@@ -33,6 +33,48 @@ boardsRouter.get(
   })
 );
 
+boardsRouter.post(
+  '/:boardId/entities',
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const result = boardsService.upsertEntity(req.userId!, req.params.boardId, req.body);
+    res.status(201).json(result);
+  })
+);
+
+boardsRouter.put(
+  '/:boardId/entities/:entityId',
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const result = boardsService.upsertEntity(req.userId!, req.params.boardId, {
+      ...req.body,
+      id: req.params.entityId,
+    });
+    res.json(result);
+  })
+);
+
+boardsRouter.post(
+  '/:boardId/connections',
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const result = boardsService.upsertConnection(
+      req.userId!,
+      req.params.boardId,
+      req.body
+    );
+    res.status(201).json(result);
+  })
+);
+
+boardsRouter.put(
+  '/:boardId/connections/:connectionId',
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const result = boardsService.upsertConnection(req.userId!, req.params.boardId, {
+      ...req.body,
+      id: req.params.connectionId,
+    });
+    res.json(result);
+  })
+);
+
 boardsRouter.get(
   '/:boardId',
   asyncHandler(async (req: AuthedRequest, res) => {

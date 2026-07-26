@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "living-canvas": {
+      "command": "npx",
+      "args": ["tsx", "server/mcp/index.ts"],
+      "env": {
+        "LIVING_CANVAS_API_URL": "http://localhost:4000"
+      }
+    }
+  }
+}

@@ -1,12 +1,7 @@
 /**
- * Future MCP tool surface.
- * HTTP routes already call the same domain services; MCP should wrap these
- * functions rather than duplicating repository logic.
- *
- * Planned tools:
- * - list_boards / get_board / upsert_board
- * - export_architecture
- * - (later) upsert_entity / upsert_connection / import_from_requirements
+ * Domain service re-exports for in-process MCP / future SSE transport.
+ * The stdio MCP entrypoint (`./index.ts`) uses the HTTP API client instead,
+ * so the API process remains the single SQLite writer.
  */
 export { authService } from '../services/auth.js';
 export { boardsService } from '../services/boards.js';

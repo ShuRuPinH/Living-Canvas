@@ -1,6 +1,22 @@
-version: '3.8'
-
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: canvas_api
+    ports:
+      - "4000:4000"
+    volumes:
+      - canvas_data:/app/data
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_PATH: /app/data/living-canvas.sqlite
+      JWT_SECRET: ${JWT_SECRET:-dev-change-me-living-canvas}
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGIN: http://localhost:3000
+    restart: unless-stopped
+
   web:
     build:
       context: .
@@ -8,4 +24,9 @@ services:
     container_name: canvas_app
     ports:
       - "3000:80"
+    depends_on:
+      - api
     restart: unless-stopped
+
+volumes:
+  canvas_data:

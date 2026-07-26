@@ -29,12 +29,22 @@ export function createApp() {
   app.use('/api/users', usersRouter);
   app.use('/api/boards', boardsRouter);
 
-  // Reserved mount point for future MCP HTTP/SSE transport
+  // Stdio MCP lives in server/mcp/index.ts (Cursor). HTTP/SSE transport TBD.
   app.get('/api/mcp', (_req, res) => {
-    res.status(501).json({
-      error: 'MCP transport not implemented yet',
-      code: 'MCP_PENDING',
-      hint: 'Domain services (boards/auth) are ready to wrap as MCP tools',
+    res.json({
+      ok: true,
+      transport: 'stdio',
+      entry: 'server/mcp/index.ts',
+      tools: [
+        'list_boards',
+        'get_board',
+        'upsert_entity',
+        'upsert_connection',
+        'export_architecture',
+        'create_board',
+      ],
+      prompt: 'update_board_from_requirements',
+      docs: 'docs/mcp.md',
     });
   });
 
