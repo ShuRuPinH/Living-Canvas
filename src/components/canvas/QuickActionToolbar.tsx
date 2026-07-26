@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import * as LucideIcons from 'lucide-react';
-import { CanvasElement, CanvasConnection } from '../../types/canvas';
+import { CanvasElement, CanvasConnection, ElementType } from '../../types/canvas';
+import {
+  MORPHABLE_SHAPE_OPTIONS,
+  canMorphElementType,
+  isMorphableElementType,
+  morphElementType,
+} from '../../utils/canvas';
 
 interface QuickActionToolbarProps {
   selectedElement?: CanvasElement;
@@ -19,6 +25,7 @@ interface QuickActionToolbarProps {
   onDuplicate: () => void;
   onDelete: () => void;
   onOpenDetails: () => void;
+  onUpdateElement?: (element: CanvasElement) => void;
 }
 
 export const QuickActionToolbar: React.FC<QuickActionToolbarProps> = ({
@@ -38,7 +45,26 @@ export const QuickActionToolbar: React.FC<QuickActionToolbarProps> = ({
   onDuplicate,
   onDelete,
   onOpenDetails,
+  onUpdateElement,
 }) => {
+  const [showShapeMenu, setShowShapeMenu] = useState(false);
+  const shapeMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setShowShapeMenu(false);
+  }, [selectedElement?.id]);
+
+  useEffect(() => {
+    if (!showShapeMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (shapeMenuRef.current && !shapeMenuRef.current.contains(e.target as Node)) {
+        setShowShapeMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showShapeMenu]);
+
   if (!selectedElement && !selectedConnection) return null;
 
   let posX = 0;
@@ -51,6 +77,16 @@ export const QuickActionToolbar: React.FC<QuickActionToolbarProps> = ({
     posX = window.innerWidth / 2;
     posY = 100;
   }
+
+  const canMorph =
+    selectedElement && isMorphableElementType(selectedElement.type) && !!onUpdateElement;
+
+  const handleMorph = (nextType: ElementType) => {
+    if (!selectedElement || !onUpdateElement) return;
+    if (!canMorphElementType(selectedElement.type, nextType)) return;
+    onUpdateElement(morphElementType(selectedElement, nextType));
+    setShowShapeMenu(false);
+  };
 
   return (
     <div
@@ -137,6 +173,59 @@ export const QuickActionToolbar: React.FC<QuickActionToolbarProps> = ({
           >
             <LucideIcons.Palette size={15} />
           </button>
+
+          {canMorph && (
+            <div className="relative" ref={shapeMenuRef}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowShapeMenu((prev) => !prev);
+                }}
+                className={`p-1.5 rounded-lg hover:bg-slate-800 active:bg-slate-700 transition-colors cursor-pointer flex items-center gap-0.5 ${
+                  showShapeMenu ? 'bg-slate-800 text-violet-300' : 'text-violet-400 hover:text-violet-300'
+                }`}
+                title="Convert shape (text / node / sticky)"
+              >
+                <LucideIcons.Shapes size={15} />
+                <LucideIcons.ChevronDown size={12} />
+              </button>
+
+              {showShapeMenu && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-[70] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1.5 min-w-[160px]">
+                  <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    Convert to
+                  </div>
+                  {MORPHABLE_SHAPE_OPTIONS.map((opt) => {
+                    const isActive = selectedElement.type === opt.type;
+                    const IconComp =
+                      (LucideIcons as Record<string, React.ElementType>)[opt.icon] || LucideIcons.Box;
+                    return (
+                      <button
+                        key={opt.type}
+                        type="button"
+                        disabled={isActive}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMorph(opt.type);
+                        }}
+                        className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                          isActive
+                            ? 'bg-indigo-600/40 text-indigo-200 cursor-default'
+                            : 'text-slate-200 hover:bg-slate-800'
+                        }`}
+                      >
+                        <IconComp size={14} />
+                        <span>{opt.label}</span>
+                        {isActive && (
+                          <LucideIcons.Check size={12} className="ml-auto text-indigo-300" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="w-px h-4 bg-slate-700 mx-0.5" />
 

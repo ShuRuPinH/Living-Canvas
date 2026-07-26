@@ -1,6 +1,112 @@
-import { CanvasElement, Point, LineStyle } from '../types/canvas';
+import { CanvasElement, ElementType, Point, LineStyle } from '../types/canvas';
 
 export const GRID_SIZE = 20;
+
+/** Visual types that can safely morph into each other (text ↔ node shapes ↔ sticky). */
+export const MORPHABLE_ELEMENT_TYPES: ElementType[] = [
+  'text',
+  'rectangle',
+  'rounded-rectangle',
+  'circle',
+  'ellipse',
+  'diamond',
+  'sticky-note',
+];
+
+export const MORPHABLE_SHAPE_OPTIONS: {
+  type: ElementType;
+  label: string;
+  icon: string;
+}[] = [
+  { type: 'text', label: 'Text', icon: 'Type' },
+  { type: 'rectangle', label: 'Rectangle', icon: 'Square' },
+  { type: 'rounded-rectangle', label: 'Rounded', icon: 'RectangleHorizontal' },
+  { type: 'circle', label: 'Circle', icon: 'Circle' },
+  { type: 'ellipse', label: 'Ellipse', icon: 'Disc' },
+  { type: 'diamond', label: 'Diamond', icon: 'Diamond' },
+  { type: 'sticky-note', label: 'Sticky Note', icon: 'StickyNote' },
+];
+
+export function isMorphableElementType(type: ElementType): boolean {
+  return MORPHABLE_ELEMENT_TYPES.includes(type);
+}
+
+export function canMorphElementType(from: ElementType, to: ElementType): boolean {
+  return from !== to && isMorphableElementType(from) && isMorphableElementType(to);
+}
+
+/**
+ * Convert visual shape between text / node shapes / sticky-note.
+ * Preserves id, position, knowledge data, and relationships.
+ */
+export function morphElementType(element: CanvasElement, nextType: ElementType): CanvasElement {
+  if (!canMorphElementType(element.type, nextType)) {
+    return element;
+  }
+
+  const centerX = element.x + element.width / 2;
+  const centerY = element.y + element.height / 2;
+
+  let width = element.width;
+  let height = element.height;
+  const style = { ...element.style };
+
+  if (nextType === 'text') {
+    width = Math.max(width, 120);
+    height = Math.min(Math.max(height, 40), 72);
+    style.fillColor = style.fillColor ?? 'transparent';
+    style.strokeColor = style.strokeColor ?? 'transparent';
+    style.strokeWidth = style.strokeWidth ?? 0;
+  } else if (nextType === 'sticky-note') {
+    width = Math.max(width, 160);
+    height = Math.max(height, 140);
+    style.stickyColor = style.stickyColor || '#fef08a';
+    style.textColor = style.textColor || '#713f12';
+    style.fontSize = style.fontSize || 13;
+  } else if (nextType === 'circle') {
+    const side = Math.max(Math.round((width + height) / 2), 100);
+    width = side;
+    height = side;
+    style.fillColor = style.fillColor && style.fillColor !== 'transparent' ? style.fillColor : '#ffffff';
+    style.strokeColor =
+      style.strokeColor && style.strokeColor !== 'transparent' ? style.strokeColor : '#64748b';
+    style.strokeWidth = style.strokeWidth && style.strokeWidth > 0 ? style.strokeWidth : 2;
+  } else {
+    // rectangle, rounded-rectangle, ellipse, diamond
+    width = Math.max(width, 140);
+    height = Math.max(height, 80);
+    style.fillColor = style.fillColor && style.fillColor !== 'transparent' ? style.fillColor : '#ffffff';
+    style.strokeColor =
+      style.strokeColor && style.strokeColor !== 'transparent' ? style.strokeColor : '#64748b';
+    style.strokeWidth = style.strokeWidth && style.strokeWidth > 0 ? style.strokeWidth : 2;
+    if (nextType === 'rounded-rectangle') {
+      style.cornerRadius = style.cornerRadius || 12;
+    }
+  }
+
+  // Keep element centered when size changes
+  const x = centerX - width / 2;
+  const y = centerY - height / 2;
+
+  const historyEntry = {
+    id: `h-${Date.now()}`,
+    action: 'Shape Changed',
+    details: `${element.type} → ${nextType}`,
+    timestamp: new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }),
+    actor: 'Current User',
+  };
+
+  return {
+    ...element,
+    type: nextType,
+    x,
+    y,
+    width,
+    height,
+    style,
+    history: [historyEntry, ...(element.history || [])],
+  };
+}
 
 export function screenToCanvas(
   screenPoint: Point,

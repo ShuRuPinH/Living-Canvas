@@ -28,6 +28,8 @@ interface TopToolbarProps {
   onExportPNG: () => void;
   onResetDemo: () => void;
   onOpenShortcuts: () => void;
+  currentUserName?: string;
+  onLogout?: () => void;
 }
 
 export const TopToolbar: React.FC<TopToolbarProps> = ({
@@ -56,6 +58,8 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
   onExportPNG,
   onResetDemo,
   onOpenShortcuts,
+  currentUserName,
+  onLogout,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(boardName);
@@ -335,6 +339,23 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
             </div>
           )}
         </div>
+
+        {currentUserName && (
+          <div className="hidden sm:flex items-center gap-2 pl-2 ml-1 border-l border-slate-200">
+            <span className="text-xs text-slate-500 max-w-[120px] truncate" title={currentUserName}>
+              {currentUserName}
+            </span>
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Sign out"
+              >
+                <LucideIcons.LogOut size={16} />
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

@@ -672,6 +672,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({
         }}
         onDelete={onDeleteSelected}
         onOpenDetails={(tab) => onOpenDetails(tab || 'overview')}
+        onUpdateElement={(el) => onUpdateElement(el)}
       />
 
       {/* Active Connection Drawing Banner Toast */}

@@ -3,7 +3,7 @@ import * as LucideIcons from 'lucide-react';
 import {
   CanvasElement,
   CanvasConnection,
-  ConnectionType,
+  ElementType,
   KnowledgeObjectType,
   PropertyItem,
   NoteItem,
@@ -11,6 +11,12 @@ import {
   AttachmentItem,
 } from '../../types/canvas';
 import { OBJECT_TYPE_SUGGESTIONS } from '../../constants/templates';
+import {
+  MORPHABLE_SHAPE_OPTIONS,
+  canMorphElementType,
+  isMorphableElementType,
+  morphElementType,
+} from '../../utils/canvas';
 
 interface EntityDetailsPanelProps {
   element?: CanvasElement;
@@ -141,6 +147,12 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
       type ? `Changed object type to ${type}` : 'Cleared object type'
     );
     onUpdateElement(updated);
+  };
+
+  const handleShapeMorph = (nextType: ElementType) => {
+    if (!element) return;
+    if (!canMorphElementType(element.type, nextType)) return;
+    onUpdateElement(morphElementType(element, nextType));
   };
 
   const handleApplySuggestedProperties = () => {
@@ -436,6 +448,42 @@ export const EntityDetailsPanel: React.FC<EntityDetailsPanelProps> = ({
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && element && (
           <div className="space-y-4">
+            {/* Visual Shape Morph (text ↔ nodes ↔ sticky) */}
+            {isMorphableElementType(element.type) && (
+              <div>
+                <label className="font-semibold text-slate-500 dark:text-slate-400 block mb-1.5">
+                  Visual Shape
+                </label>
+                <p className="text-[11px] text-slate-400 mb-2">
+                  Convert between text, node shapes, and sticky note. Knowledge data and connections stay intact.
+                </p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {MORPHABLE_SHAPE_OPTIONS.map((opt) => {
+                    const isActive = element.type === opt.type;
+                    const IconComp =
+                      (LucideIcons as Record<string, React.ElementType>)[opt.icon] || LucideIcons.Box;
+                    return (
+                      <button
+                        key={opt.type}
+                        type="button"
+                        disabled={isActive}
+                        onClick={() => handleShapeMorph(opt.type)}
+                        className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border text-[10px] font-semibold transition-colors cursor-pointer ${
+                          isActive
+                            ? 'bg-indigo-50 dark:bg-indigo-950/80 border-indigo-400 text-indigo-700 dark:text-indigo-300'
+                            : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300'
+                        } disabled:cursor-default`}
+                        title={isActive ? `Current: ${opt.label}` : `Convert to ${opt.label}`}
+                      >
+                        <IconComp size={16} />
+                        <span className="truncate w-full text-center">{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Object Type Selector */}
             <div>
               <div className="flex items-center justify-between mb-1">

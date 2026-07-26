@@ -1,5 +1,6 @@
 import { CanvasBoardState } from '../types/canvas';
 import { DEMO_BOARD_STATE } from '../constants/templates';
+import { queueRemoteBoardSave } from './remoteSync';
 
 const STORAGE_KEY = 'living_canvas_board_data_v1';
 
@@ -27,6 +28,7 @@ export function saveBoardState(state: CanvasBoardState): boolean {
       updatedAt: new Date().toISOString(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+    queueRemoteBoardSave(stateToSave);
     return true;
   } catch (error) {
     console.error('Failed to save board state:', error);

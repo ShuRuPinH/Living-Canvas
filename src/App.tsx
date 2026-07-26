@@ -2,13 +2,13 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   CanvasElement,
   CanvasConnection,
+  CanvasBoardState,
   ToolType,
   ViewMode,
   DisplayMode,
   ElementType,
 } from './types/canvas';
 import {
-  loadBoardState,
   exportBoardToJSON,
   importBoardFromJSON,
   resetBoardToDemo,
@@ -16,6 +16,7 @@ import {
 import { isElementContainedInFrame } from './utils/canvas';
 import { useCanvasHistory } from './hooks/useCanvasHistory';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import type { ApiUser } from './api/client';
 
 import { TopToolbar } from './components/toolbar/TopToolbar';
 import { LeftToolbar } from './components/toolbar/LeftToolbar';
@@ -29,10 +30,15 @@ import { GraphView } from './components/views/GraphView';
 import { BoardView } from './components/views/BoardView';
 import { KeyboardShortcutsModal } from './components/views/KeyboardShortcutsModal';
 
-export default function App() {
-  const initialState = loadBoardState();
+type AppProps = {
+  initialBoard: CanvasBoardState;
+  currentUser: ApiUser;
+  onLogout: () => void;
+};
+
+export default function App({ initialBoard, currentUser, onLogout }: AppProps) {
   const { boardState, setBoardState, undo, redo, canUndo, canRedo } =
-    useCanvasHistory(initialState);
+    useCanvasHistory(initialBoard);
 
   // Active Tool & View
   const [activeTool, setActiveTool] = useState<ToolType>('select');
@@ -539,6 +545,8 @@ export default function App() {
         onExportPNG={handleExportPNG}
         onResetDemo={handleResetDemo}
         onOpenShortcuts={() => setShowShortcutsModal(true)}
+        currentUserName={currentUser.displayName}
+        onLogout={onLogout}
       />
 
       {/* Main Views Container */}
