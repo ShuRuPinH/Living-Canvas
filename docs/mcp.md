@@ -12,8 +12,8 @@ Cursor talks to Living Canvas boards through this MCP server.
 `.cursor/mcp.json` points at `server/mcp/index.ts`. Set credentials in the environment (or replace placeholders in mcp.json):
 
 ```bash
-export LIVING_CANVAS_EMAIL="you@example.com"
-export LIVING_CANVAS_PASSWORD="your-password"
+export LIVING_CANVAS_EMAIL="shurupin@gmail.com"
+export LIVING_CANVAS_PASSWORD="XAA2UVh2zvZeFZH"
 # optional:
 # export LIVING_CANVAS_API_URL="http://localhost:4000"
 # export LIVING_CANVAS_TOKEN="<jwt from login>"
